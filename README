@@ -1,0 +1,33 @@
+Kevin Yeh
+
+HOW TO RUN
+-------------
+
+to compile:
+
+     make
+     java mdl scripts/gouraudAnim.mdl
+
+the animation frames will be placed into animations/gouraudAnim/
+from there, you can do:
+     
+     animate -delay 3 ./* (suggested delay)
+
+
+*NOTE: you can also test flat shading by running:
+     java mdl scripts/flatAnim.mdl
+
+and animating the files created in the corresponding animations/ directories.
+
+FEATURES
+-------------
+Scanline
+Z-Buffering
+Flat Shading
+Gouraud Shading
+
+BUGS
+-------------
+Gouraud:
+  shading works for black and white, with black spot at the sphere's rear end.
+  shading is not uniform for colored objects; transitions in layers.

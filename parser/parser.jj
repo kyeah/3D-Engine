@@ -1,0 +1,579 @@
+options
+{
+	STATIC=false;
+}
+
+PARSER_BEGIN(MdlParser)
+
+package parser;
+
+import java.util.*;
+import parseTables.*;
+
+public class MdlParser
+{
+  private ArrayList<opCode> opcodeArrayList = new ArrayList<opCode>();
+  private SymTab symtab = new SymTab();
+  public ArrayList<opCode> getOps()
+  {
+	return opcodeArrayList;
+  }
+  public SymTab getSymTab()
+  {
+	return symtab;
+  }
+
+  public static void main(String args[]) throws ParseException {
+  MdlParser parser = new MdlParser(System.in);	
+    parser.start();
+  }
+}
+
+PARSER_END(MdlParser)
+
+SKIP :
+{
+  " "
+| "\t"
+}
+
+MORE :
+{
+  "//" : IN_SINGLE_LINE_COMMENT
+}
+
+<IN_SINGLE_LINE_COMMENT>SPECIAL_TOKEN :
+{
+  <SINGLE_LINE_COMMENT: "\n" | "\r" | "\r\n"> : DEFAULT
+}
+
+<IN_SINGLE_LINE_COMMENT>MORE :
+{
+  <~[]>
+}
+
+
+TOKEN :
+{
+    <BOX: "box">
+|   <SPHERE: "sphere">
+|   <TORUS: "torus">
+|   <LINE: "line">
+|   <MESH: "mesh">
+|   <ROTATE: "rotate">
+|   <MOVE: "move">
+|   <SCALE: "scale">
+|   <PUSH: "push">
+|   <POP: "pop">
+|   <BASENAME: "basename">
+|   <SET: "set">
+|   <SETKNOBS: "setknobs">
+|   <GENRAYS: "generate_rayfiles">
+|   <SHADING: "shading">
+|   <FOCAL: "focal">
+|   <DISPLAY: "display">
+|   <LIGHT: "light">
+|   <AMBIENT: "ambient">
+|   <CONSTANTS: "constants">
+|   <SAVECS: "save_coord_system">
+|   <CAMERA: "camera">
+|   <SAVEKNOBS: "save_knobs">
+|   <TWEEN: "tween">
+|   <FRAMES: "frames">
+|   <VARY: "vary">
+|   <SAVE: "save">
+|   <DOUBLE:
+	<INT>
+	| ("-")?(<DIGIT>)+"."(<DIGIT>)+
+	| ("-")?"."(<DIGIT>)+>
+|   <INT: ("-")?(<DIGIT>)+>
+|   <DIGIT:["0"-"9"]>
+|   <ID: ["a"-"z","A"-"Z","_","."](["a"-"z","A"-"Z","0"-"9","_","."])*>
+|   <FN: ":">
+}
+
+void start() :{}
+{ 
+	(statement() "\n")+
+|	<EOF> 	
+}
+
+void statement() :
+{}
+{ 
+	box()
+	|sphere()
+	|torus()
+	|line()
+	|mesh()
+	|move()
+	|scale()
+	|rotate()
+	|push()
+	|pop()
+	|generate_rayfiles()
+	|shading()
+	|focal()
+	|display()
+	|light()
+	|ambient()
+	|constants()
+	|basename()
+	|set()
+	|setknobs()
+	|savecs()
+	|camera()
+	|saveknobs()
+	|tween()
+	|frames()
+	|vary()
+	|save()
+}
+
+
+void tween():
+{
+	int start,stop;
+	Token k1Tok,k2Tok;
+	Token startTok,stopTok;
+}
+{
+	<TWEEN> startTok=<DOUBLE> stopTok=<DOUBLE> k1Tok=<ID> k2Tok=<ID>
+	{
+	start=Integer.parseInt(startTok.toString());
+	stop=Integer.parseInt(stopTok.toString());
+	opTween t = new opTween(start,stop,k1Tok.toString(),k2Tok.toString());
+	opcodeArrayList.add(t);
+	}
+}
+
+void vary():
+{
+	Token kTok,sfTok,efTok,svTok,evTok;
+}
+{
+	<VARY> kTok=<ID> sfTok=<DOUBLE> efTok=<DOUBLE> svTok=<DOUBLE> evTok=<DOUBLE>
+	{
+	opVary v = new opVary(kTok.toString(),
+				Integer.parseInt(sfTok.toString()),
+				Integer.parseInt(efTok.toString()),
+				Double.parseDouble(svTok.toString()),
+				Double.parseDouble(evTok.toString()));
+	opcodeArrayList.add(v);
+	}
+}
+
+
+void frames():
+{
+	Token t;
+}
+{
+	<FRAMES> t=<DOUBLE>
+	{
+	opFrames f = new opFrames(Integer.parseInt(t.toString()));
+	opcodeArrayList.add(f);
+	}
+}
+
+
+void camera():
+{
+	double[] eye, aim;	
+}
+{
+	<CAMERA> eye=triple() aim=triple()
+	{
+	opCamera c = new opCamera(eye,aim);
+	opcodeArrayList.add(c);
+	}
+}
+
+void light():
+{
+	double[] rgb, location;	
+	Token tok;
+}
+{
+	<LIGHT> tok=<ID> rgb=triple() location=triple()
+	{
+	symtab.add(tok.toString(),tok.toString());
+	opLight l = new opLight(tok.toString(),rgb,location);
+	opcodeArrayList.add(l);
+	}
+}
+
+void ambient():
+{
+	double[] rgb;
+}
+{
+	<AMBIENT> rgb=triple()
+	{
+	opAmbient a = new opAmbient(rgb);
+	opcodeArrayList.add(a);
+	}
+}
+
+void constants():
+{
+	double[] ambient,diffuse,specular,rgb=null;
+	Token sTok;
+}
+{
+	<CONSTANTS> sTok=<ID> ambient=triple() diffuse=triple() specular=triple() (rgb=triple())?
+	{
+		
+		opConstants c = new opConstants(sTok.toString(),ambient,diffuse,specular,rgb);
+		opcodeArrayList.add(c);
+	}
+}
+
+
+void set():
+{
+	Token kTok=null;
+	Token vTok=null;
+	String knob;
+	double value;
+}
+{
+	<SET> kTok=<ID> vTok=<DOUBLE>
+	{
+	knob=kTok.toString();
+	value=Double.parseDouble(vTok.toString());
+
+	symtab.add(knob,new Double(value));
+	opSet s = new opSet(knob,value);
+	opcodeArrayList.add(s);
+	}
+
+}
+
+void setknobs():
+{
+	Token vTok=null;
+	double value;
+}
+{
+	<SETKNOBS> vTok=<DOUBLE>
+	{
+	value=Double.parseDouble(vTok.toString());
+	opSetknobs s = new opSetknobs(value);
+	opcodeArrayList.add(s);
+	}
+
+}
+
+
+
+void savecs():
+{
+	Token nTok = null;
+}
+{
+	<SAVECS> nTok=<ID>
+	{
+	opSavecs b = new opSavecs(nTok.toString());
+	opcodeArrayList.add(b);
+	}
+}	
+
+void saveknobs():
+{
+	Token nTok = null;
+}
+{
+	<SAVEKNOBS> nTok=<ID>
+	{
+	opSaveknobs b = new opSaveknobs(nTok.toString());
+	opcodeArrayList.add(b);
+	}
+}	
+
+
+void save():
+{
+	Token nTok = null;
+}
+{
+	<SAVE> nTok=<ID>
+	{
+	opSave b = new opSave(nTok.toString());
+	opcodeArrayList.add(b);
+	}
+}	
+
+void basename():
+{
+	Token nTok = null;
+}
+{
+	<BASENAME> nTok=<ID>
+	{
+	opBasename b = new opBasename(nTok.toString());
+	opcodeArrayList.add(b);
+	}
+}	
+
+
+void shading():
+{
+	Token nTok = null;
+}
+{
+	<SHADING> nTok=<ID>
+	{
+	opShading b = new opShading(nTok.toString());
+	opcodeArrayList.add(b);
+	}
+}	
+
+void focal():
+{
+	Token nTok = null;
+}
+{
+	<FOCAL> nTok=<DOUBLE>
+	{
+	opFocal b = new opFocal(Double.parseDouble(nTok.toString()));
+	opcodeArrayList.add(b);
+	}
+}	
+
+
+void push():
+{}
+{
+	<PUSH>
+	{
+	opPush p = new opPush();
+	opcodeArrayList.add(p);
+	}
+}
+
+void display():
+{}
+{
+	<DISPLAY>
+	{
+	opDisplay p = new opDisplay();
+	opcodeArrayList.add(p);
+	}
+}
+
+void generate_rayfiles():
+{}
+{
+	<GENRAYS>
+	{
+	opGeneraterayfiles p = new opGeneraterayfiles();
+	opcodeArrayList.add(p);
+	}
+}
+
+
+void pop():
+{
+}
+{
+	<POP>
+	{
+	opPop p = new opPop();
+	opcodeArrayList.add(p);
+	}
+}
+
+
+void rotate():
+{
+	char axis;
+	double deg;
+	Token dTok=null;
+	String knob=null;
+	Token kTok=null;
+}
+{
+	<ROTATE> axis=axis() dTok=<DOUBLE> (kTok=<ID>)?
+	{
+	if (kTok != null)
+	{
+		knob=kTok.toString();
+		symtab.add(knob,new Double(0));
+	}
+	deg = Double.parseDouble(dTok.toString());
+	opRotate r = new opRotate(axis,deg,knob);
+	opcodeArrayList.add(r);
+	}
+}
+
+
+char axis() :
+{
+	Token t;
+}
+{
+	t=<ID>
+	{
+	return t.toString().charAt(0);
+	}
+}
+
+void move():
+{
+	Token kTok=null;
+	String knob=null;
+	double[] tr;
+}
+{
+	<MOVE> tr=triple() (kTok=<ID>)?
+	{
+	if (kTok != null)
+	{
+		knob=kTok.toString();
+		symtab.add(knob,new Double(0));
+	}
+	opMove m = new opMove(tr,knob);
+	opcodeArrayList.add(m);
+}
+}	
+
+void scale():
+{
+	Token kTok=null;
+	String knob=null;
+	double[] sc;
+}
+{
+	<SCALE> sc=triple() (kTok=<ID>)?
+	{
+	if (kTok != null)
+	{
+		knob=kTok.toString();
+		symtab.add(knob,new Double(0));
+	}
+	opScale m = new opScale(sc,knob);
+	opcodeArrayList.add(m);
+}
+}	
+
+
+void sphere() :
+{
+	Token t1,t2,t3;	
+	double[] center;
+	Token RTok;
+	Token consTok=null;
+	Token csTok=null;
+	String cons=null, cs=null;
+}
+{
+	<SPHERE> (consTok=<ID>)? center=triple() RTok=<DOUBLE> (csTok=<ID>)?
+	{
+	if (consTok != null)
+	  cons = consTok.toString();
+	if (csTok != null)
+	  cs = csTok.toString();
+	opSphere s = new opSphere(center,Double.parseDouble(RTok.toString()),cs,cons);
+	  opcodeArrayList.add(s);
+	}
+}
+
+void torus() :
+{
+	Token t1,t2,t3;	
+	double[] center;
+	double r,R;
+	Token RTok,rTok;
+	Token consTok=null;
+	Token csTok=null;
+	String cs=null,cons=null;
+}
+{
+	<TORUS> (consTok=<ID>)?center=triple() RTok=<DOUBLE> rTok=<DOUBLE> (csTok=<ID>)?
+	{ System.out.println("we got "+center[0]+center[1]+center[2]+
+			"radius="+RTok+" r="+rTok+"CS="+csTok);
+	if (consTok != null) cons = consTok.toString();
+	if (csTok != null) cs=csTok.toString();
+	r=Double.parseDouble(rTok.toString());
+	R=Double.parseDouble(RTok.toString());
+	opTorus t = new opTorus(center,R,r,cs,cons);
+	opcodeArrayList.add(t);	
+	}
+}
+
+void box() :
+{
+	Token t1,t2,t3;	
+	double[] p1,p2;
+	Token consTok=null;
+	Token csTok=null;
+	Token cs2Tok=null;
+	String cs=null,cs2=null,cons=null;
+}
+{
+	<BOX> (consTok=<ID>)?p1=triple() (csTok=<ID>)? p2=triple() (cs2Tok=<ID>)?
+	{
+	if (consTok != null) cons = consTok.toString();
+	if (csTok != null) cs=csTok.toString();
+	if (cs2Tok != null) cs2=cs2Tok.toString();
+	opBox b = new opBox(p1,cs,p2,cs2,cons);
+	opcodeArrayList.add(b);	
+	}
+}
+
+
+
+void line() :
+{
+	Token t1,t2,t3;	
+	double[] p1,p2;
+	Token consTok=null;
+	Token csTok=null;
+	Token cs2Tok=null;
+	String cs=null,cs2=null,cons=null;
+}
+{
+	<LINE> (consTok=<ID>)?p1=triple() (csTok=<ID>)? p2=triple() (cs2Tok=<ID>)?
+	{
+	if (consTok != null) cons = consTok.toString();
+	if (csTok != null) cs=csTok.toString();
+	if (cs2Tok != null) cs2=cs2Tok.toString();
+	opLine l = new opLine(p1,cs,p2,cs2,cons);
+	opcodeArrayList.add(l);	
+	}
+}
+
+void mesh() :
+{
+	Token consTok=null;
+	Token csTok=null;
+	Token fnTok=null;
+	String cs=null,fn=null,cons=null;
+}
+{
+	<MESH> (consTok=<ID>)? <FN> fnTok=<ID> (csTok=<ID>)? 
+	{
+	if (consTok != null) cons = consTok.toString();
+	if (csTok != null) cs=csTok.toString();
+	fn=fnTok.toString();
+	opMesh m = new opMesh(fn,cs,cons);
+	opcodeArrayList.add(m);	
+	}
+}
+
+double[] triple() :
+{
+	Token t1,t2,t3;
+	double[] d;
+}
+{
+	t1=<DOUBLE> t2=<DOUBLE> t3=<DOUBLE>
+	{
+		d = new double[3];
+		d[0]=Double.parseDouble(t1.image);
+		d[1]=Double.parseDouble(t2.image);
+		d[2]=Double.parseDouble(t3.image);
+		return d;
+	}
+}

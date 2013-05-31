@@ -1,0 +1,47 @@
+frames 200
+basename flatAnim
+ambient .3 .3 .3
+light testlight .5 .5 .5 100 400 200
+shading flat
+////////
+push
+move 250 250 0
+rotate x -15
+push
+rotate y 360 rotSphere
+sphere 0 0 0 75
+pop
+////////
+push
+rotate y 360 rotBoxes
+rotate x 180 rotX
+rotate z 180 rotZ
+scale 2 1 2 scaleBoxes
+//scale 1 2 1 scaleY
+box -130 -10 37 50 20 75
+box 80 -10 37 50 20 75
+box -37 -10 130 75 20 50
+box -37 -10 -80 75 20 50
+////////Rotate entire animation
+vary rotSphere 0 50 0 .25
+vary rotSphere 51 149 .257 .743
+vary rotSphere 150 199 .75 1
+vary rotBoxes 0 50 0 .75
+vary rotBoxes 51 125 .743 0
+vary rotBoxes 126 149 0 .247
+vary rotBoxes 150 199 .25 1
+vary rotX 51 88 0 1
+//vary rotX 89 199 1 0
+vary rotZ 89 125 0 1
+//vary rotZ 126 199 1 0
+//Vary Y Boxes in middle
+//vary scaleY 76 100 .5 1
+//vary scaleY 101 125 1 .5
+//vary scaleY 126 199 .5 .5
+//Vary X and Z of Boxes at beginning and end
+vary scaleBoxes 0 25 .5 .66
+vary scaleBoxes 26 75 .67 1
+vary scaleBoxes 76 125 1 1
+vary scaleBoxes 126 175 1 .67
+vary scaleBoxes 176 199 .66 .5
+

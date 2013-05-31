@@ -1,0 +1,21 @@
+frames 100
+basename hyp
+push
+move 250 250 0
+rotate y 360 knobby
+rotate x 360 k2
+scale 2 2 2 bigenator
+sphere 0 0 0 150
+vary knobby 0 99 1 0
+vary k2 0 99 0 1
+vary bigenator 0 25 0 0.624
+vary bigenator 26 38 0.644 0.884
+vary bigenator 39 44 0.899 0.974
+vary bigenator 45 47 0.982 0.998
+vary bigenator 48 49 0.999 1
+vary bigenator 50 51 1 0.999
+vary bigenator 52 54 .998 .982
+vary bigenator 55 60 .974 .899
+vary bigenator 61 73 .884 .644
+vary bigenator 74 99 .624 0
+
