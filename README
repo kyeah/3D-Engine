@@ -1,7 +1,7 @@
 Kevin Yeh
 
 HOW TO RUN
--------------
+===========
 
 to compile:
 
@@ -20,14 +20,16 @@ from there, you can do:
 and animating the files created in the corresponding animations/ directories.
 
 FEATURES
--------------
+=============
 Scanline
 Z-Buffering
 Flat Shading
 Gouraud Shading
 
 BUGS
--------------
+=============
 Gouraud:
   shading works for black and white, with black spot at the sphere's rear end.
   shading is not uniform for colored objects; transitions in layers.
+  
+KY 2012
