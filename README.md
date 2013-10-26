@@ -4,11 +4,12 @@ Java 3D Graphics Engine and Animator
 A 3D graphics engine built from scratch in Java. Able to read scripts written in Jon-Alf Dyrland-Weaver's motion description language and generate animated gifs.
 
 #### FEATURES
-
 * Scanline
 * Z-Buffering
 * Flat Shading
 * Gouraud Shading
+
+![Gouraud Animation](http://kyeh.me/images/code/gouraud.gif)
 
 Usage
 ==========
@@ -28,7 +29,6 @@ from there, you can generate a gif:
 * gouraudAnim - Gouraud shading test
 * gouraudtorus - Torus test
 * discoAnim - Flat shading test with random colors for each polygon
-
 * animtest - general test
 * hypnotic
 * test
