@@ -1,7 +1,7 @@
 Java 3D Graphics Engine and Animator
 ======================================
 
-A 3D graphics engine built from scratch in Java. Able to read scripts written in Jon-Alf Dyrland-Weaver's motion description language and generate animated gifs.
+A 3D graphics engine built from scratch in Java. Able to read scripts written in Jon-Alf Dyrland-Weaver's custom motion description language (MDL) to generate animated gifs.
 
 #### FEATURES
 * Scanline
