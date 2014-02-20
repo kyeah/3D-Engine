@@ -1,7 +1,7 @@
 Java 3D Graphics Engine and Animator
 ======================================
 
-A 3D graphics engine built from scratch in Java. Able to read scripts written in Jon-Alf Dyrland-Weaver's custom motion description language (MDL) to generate animated gifs.
+A 3D graphics engine built from scratch in Java. It generates and displays spheres, boxes, and toruses with z-buffering and backface-culling. Supports translations, rotations, and scaling, with flat and gouraud shading. Able to read scripts written in Jon-Alf Dyrland-Weaver's custom motion description language (MDL) to generate animated gifs.
 
 #### FEATURES
 * Scanline
@@ -9,7 +9,7 @@ A 3D graphics engine built from scratch in Java. Able to read scripts written in
 * Flat Shading
 * Gouraud Shading
 
-![Gouraud Animation](http://kyeh.me/images/code/gouraud.gif)
+![Gouraud Animation](http://kyeh.me/img/projects/thumb-small-gouraud.gif)
 
 Usage
 ==========
